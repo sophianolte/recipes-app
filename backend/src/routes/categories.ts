@@ -1,6 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const { db } = require('../database');
+import { Router, Request, Response } from 'express';
+import { dbHelpers } from '../database';
+import { Category, Recipe, CreateCategoryRequest } from '../types';
+
+const router = Router();
 
 /**
  * @swagger
@@ -46,12 +48,13 @@ const { db } = require('../database');
  *               items:
  *                 $ref: '#/components/schemas/Category'
  */
-router.get('/', (req, res) => {
+router.get('/', (_req: Request, res: Response) => {
   try {
-    const categories = db.prepare('SELECT * FROM Category ORDER BY name').all();
+    const categories = dbHelpers.prepare('SELECT * FROM Category ORDER BY name').all() as Category[];
     res.json(categories);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -78,10 +81,10 @@ router.get('/', (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.get('/:id', (req, res) => {
+router.get('/:id', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
-    const category = db.prepare('SELECT * FROM Category WHERE id = ?').get(id);
+    const category = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${id}`).get() as Category | undefined;
 
     if (!category) {
       return res.status(404).json({ error: 'Category not found' });
@@ -89,7 +92,8 @@ router.get('/:id', (req, res) => {
 
     res.json(category);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -115,7 +119,7 @@ router.get('/:id', (req, res) => {
  *       400:
  *         description: Invalid input or category already exists
  */
-router.post('/', (req, res) => {
+router.post('/', (req: Request<{}, {}, CreateCategoryRequest>, res: Response) => {
   try {
     const { name } = req.body;
 
@@ -124,17 +128,18 @@ router.post('/', (req, res) => {
     }
 
     // Check if category already exists
-    const existing = db.prepare('SELECT * FROM Category WHERE name = ?').get(name.trim());
+    const existing = dbHelpers.prepare(`SELECT * FROM Category WHERE name = '${name.trim()}'`).get() as Category | undefined;
     if (existing) {
       return res.status(400).json({ error: 'Category already exists' });
     }
 
-    const result = db.prepare('INSERT INTO Category (name) VALUES (?)').run(name.trim());
-    const newCategory = db.prepare('SELECT * FROM Category WHERE id = ?').get(result.lastInsertRowid);
+    const result = dbHelpers.prepare('INSERT INTO Category (name) VALUES (?)').run(name.trim());
+    const newCategory = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${result.lastInsertRowid}`).get() as Category;
 
     res.status(201).json(newCategory);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -163,7 +168,7 @@ router.post('/', (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', (req: Request<{ id: string }, {}, CreateCategoryRequest>, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -172,23 +177,24 @@ router.put('/:id', (req, res) => {
       return res.status(400).json({ error: 'Category name is required' });
     }
 
-    const existing = db.prepare('SELECT * FROM Category WHERE id = ?').get(id);
+    const existing = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${id}`).get() as Category | undefined;
     if (!existing) {
       return res.status(404).json({ error: 'Category not found' });
     }
 
     // Check if new name already exists (for a different category)
-    const duplicate = db.prepare('SELECT * FROM Category WHERE name = ? AND id != ?').get(name.trim(), id);
+    const duplicate = dbHelpers.prepare(`SELECT * FROM Category WHERE name = '${name.trim()}' AND id != ${id}`).get() as Category | undefined;
     if (duplicate) {
       return res.status(400).json({ error: 'Category name already exists' });
     }
 
-    db.prepare('UPDATE Category SET name = ? WHERE id = ?').run(name.trim(), id);
-    const updatedCategory = db.prepare('SELECT * FROM Category WHERE id = ?').get(id);
+    dbHelpers.prepare(`UPDATE Category SET name = ? WHERE id = ?`).run(name.trim(), parseInt(id, 10));
+    const updatedCategory = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${id}`).get() as Category;
 
     res.json(updatedCategory);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -211,21 +217,23 @@ router.put('/:id', (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
-    const existing = db.prepare('SELECT * FROM Category WHERE id = ?').get(id);
+    const existing = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${id}`).get() as Category | undefined;
     if (!existing) {
       return res.status(404).json({ error: 'Category not found' });
     }
 
-    // Recipes with this categoryId will have categoryId set to NULL (ON DELETE SET NULL)
-    db.prepare('DELETE FROM Category WHERE id = ?').run(id);
+    // Set categoryId to NULL for recipes with this category
+    dbHelpers.prepare(`UPDATE Recipe SET categoryId = NULL WHERE categoryId = ${id}`).run();
+    dbHelpers.prepare(`DELETE FROM Category WHERE id = ${id}`).run();
 
     res.json({ message: 'Category deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -248,26 +256,27 @@ router.delete('/:id', (req, res) => {
  *       404:
  *         description: Category not found
  */
-router.get('/:id/recipes', (req, res) => {
+router.get('/:id/recipes', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
-    const category = db.prepare('SELECT * FROM Category WHERE id = ?').get(id);
+    const category = dbHelpers.prepare(`SELECT * FROM Category WHERE id = ${id}`).get() as Category | undefined;
     if (!category) {
       return res.status(404).json({ error: 'Category not found' });
     }
 
-    const recipes = db.prepare(`
-      SELECT * FROM Recipe WHERE categoryId = ? ORDER BY createdAt DESC
-    `).all(id);
+    const recipes = dbHelpers.prepare(`
+      SELECT * FROM Recipe WHERE categoryId = ${id} ORDER BY createdAt DESC
+    `).all() as Recipe[];
 
     res.json({
       category,
-      recipes
+      recipes,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
-module.exports = router;
+export default router;

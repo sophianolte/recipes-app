@@ -1,15 +1,25 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+import initSqlJs, { Database as SqlJsDatabase } from 'sql.js';
+import fs from 'fs';
+import path from 'path';
+import { CountResult } from './types';
 
 const dbPath = path.join(__dirname, '..', 'recipes.db');
-const db = new Database(dbPath);
 
-function initializeDatabase() {
-  // Enable foreign keys
-  db.pragma('foreign_keys = ON');
+let db: SqlJsDatabase;
+
+export async function initializeDatabase(): Promise<void> {
+  const SQL = await initSqlJs();
+
+  // Load existing database or create new one
+  if (fs.existsSync(dbPath)) {
+    const fileBuffer = fs.readFileSync(dbPath);
+    db = new SQL.Database(fileBuffer);
+  } else {
+    db = new SQL.Database();
+  }
 
   // Create Category table
-  db.exec(`
+  db.run(`
     CREATE TABLE IF NOT EXISTS Category (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
@@ -18,7 +28,7 @@ function initializeDatabase() {
   `);
 
   // Create Recipe table
-  db.exec(`
+  db.run(`
     CREATE TABLE IF NOT EXISTS Recipe (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       categoryId INTEGER,
@@ -34,7 +44,7 @@ function initializeDatabase() {
   `);
 
   // Create Ingredient table
-  db.exec(`
+  db.run(`
     CREATE TABLE IF NOT EXISTS Ingredient (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       recipeId INTEGER NOT NULL,
@@ -46,7 +56,7 @@ function initializeDatabase() {
   `);
 
   // Create Step table
-  db.exec(`
+  db.run(`
     CREATE TABLE IF NOT EXISTS Step (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       recipeId INTEGER NOT NULL,
@@ -56,42 +66,107 @@ function initializeDatabase() {
     )
   `);
 
+  // Enable foreign keys
+  db.run('PRAGMA foreign_keys = ON');
+
   // Insert default categories if none exist
-  const categoryCount = db.prepare('SELECT COUNT(*) as count FROM Category').get();
-  if (categoryCount.count === 0) {
-    const insertCategory = db.prepare('INSERT INTO Category (name) VALUES (?)');
+  const categoryResult = db.exec('SELECT COUNT(*) as count FROM Category');
+  const categoryCount = categoryResult[0]?.values[0]?.[0] as number || 0;
+  
+  if (categoryCount === 0) {
     const defaultCategories = ['Starter', 'Main Course', 'Dessert', 'Soup', 'Salad', 'Snack', 'Drink'];
-    defaultCategories.forEach(name => insertCategory.run(name));
+    defaultCategories.forEach(name => {
+      db.run('INSERT INTO Category (name) VALUES (?)', [name]);
+    });
     console.log('✅ Default categories created');
   }
 
   // Insert seed recipes if none exist
-  const recipeCount = db.prepare('SELECT COUNT(*) as count FROM Recipe').get();
-  if (recipeCount.count === 0) {
+  const recipeResult = db.exec('SELECT COUNT(*) as count FROM Recipe');
+  const recipeCount = recipeResult[0]?.values[0]?.[0] as number || 0;
+  
+  if (recipeCount === 0) {
     seedRecipes();
     console.log('✅ Seed recipes created');
   }
 
+  // Save to file
+  saveDatabase();
+
   console.log('✅ Database initialized');
 }
 
-function seedRecipes() {
-  const insertRecipe = db.prepare(`
-    INSERT INTO Recipe (categoryId, title, description, servings, prepTime, isFavorite)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
+export function saveDatabase(): void {
+  const data = db.export();
+  const buffer = Buffer.from(data);
+  fs.writeFileSync(dbPath, buffer);
+}
 
-  const insertIngredient = db.prepare(`
-    INSERT INTO Ingredient (recipeId, name, amount, unit)
-    VALUES (?, ?, ?, ?)
-  `);
+export function getDb(): SqlJsDatabase {
+  return db;
+}
 
-  const insertStep = db.prepare(`
-    INSERT INTO Step (recipeId, stepNumber, instruction)
-    VALUES (?, ?, ?)
-  `);
+// Helper functions to match better-sqlite3 API style
+export const dbHelpers = {
+  prepare: (sql: string) => ({
+    all: (...params: any[]): any[] => {
+      const result = db.exec(sql, params);
+      if (result.length === 0) return [];
+      
+      const columns = result[0].columns;
+      return result[0].values.map(row => {
+        const obj: any = {};
+        columns.forEach((col, i) => {
+          obj[col] = row[i];
+        });
+        return obj;
+      });
+    },
+    get: (...params: any[]): any | undefined => {
+      const result = db.exec(sql, params);
+      if (result.length === 0 || result[0].values.length === 0) return undefined;
+      
+      const columns = result[0].columns;
+      const row = result[0].values[0];
+      const obj: any = {};
+      columns.forEach((col, i) => {
+        obj[col] = row[i];
+      });
+      return obj;
+    },
+    run: (...params: any[]): { lastInsertRowid: number; changes: number } => {
+      db.run(sql, params);
+      const lastId = db.exec('SELECT last_insert_rowid()')[0]?.values[0]?.[0] as number || 0;
+      const changes = db.getRowsModified();
+      saveDatabase();
+      return { lastInsertRowid: lastId, changes };
+    }
+  }),
+  exec: (sql: string): void => {
+    db.run(sql);
+    saveDatabase();
+  }
+};
 
-  const recipes = [
+interface SeedIngredient {
+  name: string;
+  amount: string;
+  unit: string;
+}
+
+interface SeedRecipe {
+  categoryId: number;
+  title: string;
+  description: string;
+  servings: number;
+  prepTime: number;
+  isFavorite: number;
+  ingredients: SeedIngredient[];
+  steps: string[];
+}
+
+function seedRecipes(): void {
+  const recipes: SeedRecipe[] = [
     // Recipe 1: Spaghetti Carbonara (Main Course)
     {
       categoryId: 2,
@@ -365,25 +440,30 @@ function seedRecipes() {
 
   // Insert each recipe with its ingredients and steps
   for (const recipe of recipes) {
-    const result = insertRecipe.run(
-      recipe.categoryId,
-      recipe.title,
-      recipe.description,
-      recipe.servings,
-      recipe.prepTime,
-      recipe.isFavorite
+    db.run(
+      'INSERT INTO Recipe (categoryId, title, description, servings, prepTime, isFavorite) VALUES (?, ?, ?, ?, ?, ?)',
+      [recipe.categoryId, recipe.title, recipe.description, recipe.servings, recipe.prepTime, recipe.isFavorite]
     );
 
-    const recipeId = result.lastInsertRowid;
+    const lastIdResult = db.exec('SELECT last_insert_rowid()');
+    const recipeId = lastIdResult[0]?.values[0]?.[0] as number;
 
     for (const ingredient of recipe.ingredients) {
-      insertIngredient.run(recipeId, ingredient.name, ingredient.amount, ingredient.unit);
+      db.run(
+        'INSERT INTO Ingredient (recipeId, name, amount, unit) VALUES (?, ?, ?, ?)',
+        [recipeId, ingredient.name, ingredient.amount, ingredient.unit]
+      );
     }
 
     for (let i = 0; i < recipe.steps.length; i++) {
-      insertStep.run(recipeId, i + 1, recipe.steps[i]);
+      db.run(
+        'INSERT INTO Step (recipeId, stepNumber, instruction) VALUES (?, ?, ?)',
+        [recipeId, i + 1, recipe.steps[i]]
+      );
     }
   }
+
+  saveDatabase();
 }
 
-module.exports = { db, initializeDatabase };
+export { db };

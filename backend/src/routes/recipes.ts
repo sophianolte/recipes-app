@@ -1,6 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const { db } = require('../database');
+import { Router, Request, Response } from 'express';
+import { dbHelpers } from '../database';
+import {
+  Recipe,
+  Ingredient,
+  Step,
+  RecipeWithDetails,
+  CreateRecipeRequest,
+  UpdateRecipeRequest,
+  RecipeQueryParams,
+  FavoriteToggleResponse,
+} from '../types';
+
+const router = Router();
 
 /**
  * @swagger
@@ -153,26 +164,23 @@ const { db } = require('../database');
  *               items:
  *                 $ref: '#/components/schemas/Recipe'
  */
-router.get('/', (req, res) => {
+router.get('/', (req: Request<{}, {}, {}, RecipeQueryParams>, res: Response) => {
   try {
     const { categoryId, search, favorite } = req.query;
-    
+
     let query = `
       SELECT r.*, c.name as categoryName 
       FROM Recipe r 
       LEFT JOIN Category c ON r.categoryId = c.id 
       WHERE 1=1
     `;
-    const params = [];
 
     if (categoryId) {
-      query += ' AND r.categoryId = ?';
-      params.push(categoryId);
+      query += ` AND r.categoryId = ${parseInt(categoryId, 10)}`;
     }
 
     if (search) {
-      query += ' AND r.title LIKE ?';
-      params.push(`%${search}%`);
+      query += ` AND r.title LIKE '%${search}%'`;
     }
 
     if (favorite === 'true') {
@@ -181,10 +189,11 @@ router.get('/', (req, res) => {
 
     query += ' ORDER BY r.createdAt DESC';
 
-    const recipes = db.prepare(query).all(...params);
+    const recipes = dbHelpers.prepare(query).all() as Recipe[];
     res.json(recipes);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -211,32 +220,35 @@ router.get('/', (req, res) => {
  *       404:
  *         description: Recipe not found
  */
-router.get('/:id', (req, res) => {
+router.get('/:id', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
-    const recipe = db.prepare(`
+    const recipe = dbHelpers.prepare(`
       SELECT r.*, c.name as categoryName 
       FROM Recipe r 
       LEFT JOIN Category c ON r.categoryId = c.id 
-      WHERE r.id = ?
-    `).get(id);
+      WHERE r.id = ${id}
+    `).get() as Recipe | undefined;
 
     if (!recipe) {
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
-    const ingredients = db.prepare('SELECT * FROM Ingredient WHERE recipeId = ?').all(id);
-    const steps = db.prepare('SELECT * FROM Step WHERE recipeId = ? ORDER BY stepNumber').all(id);
+    const ingredients = dbHelpers.prepare(`SELECT * FROM Ingredient WHERE recipeId = ${id}`).all() as Ingredient[];
+    const steps = dbHelpers.prepare(`SELECT * FROM Step WHERE recipeId = ${id} ORDER BY stepNumber`).all() as Step[];
 
-    res.json({
+    const recipeWithDetails: RecipeWithDetails = {
       ...recipe,
       isFavorite: Boolean(recipe.isFavorite),
       ingredients,
-      steps
-    });
+      steps,
+    };
+
+    res.json(recipeWithDetails);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -262,7 +274,7 @@ router.get('/:id', (req, res) => {
  *       400:
  *         description: Invalid input
  */
-router.post('/', (req, res) => {
+router.post('/', (req: Request<{}, {}, CreateRecipeRequest>, res: Response) => {
   try {
     const { categoryId, title, description, servings, prepTime, imageUrl, ingredients, steps } = req.body;
 
@@ -279,38 +291,50 @@ router.post('/', (req, res) => {
     }
 
     // Insert recipe
-    const recipeResult = db.prepare(`
+    const recipeResult = dbHelpers.prepare(`
       INSERT INTO Recipe (categoryId, title, description, servings, prepTime, imageUrl)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(categoryId || null, title, description || null, servings || null, prepTime || null, imageUrl || null);
+    `).run(
+      categoryId || null,
+      title,
+      description || null,
+      servings || null,
+      prepTime || null,
+      imageUrl || null
+    );
 
     const recipeId = recipeResult.lastInsertRowid;
 
     // Insert ingredients
-    const insertIngredient = db.prepare('INSERT INTO Ingredient (recipeId, name, amount, unit) VALUES (?, ?, ?, ?)');
     ingredients.forEach(ing => {
-      insertIngredient.run(recipeId, ing.name, ing.amount || null, ing.unit || null);
+      dbHelpers.prepare('INSERT INTO Ingredient (recipeId, name, amount, unit) VALUES (?, ?, ?, ?)').run(
+        recipeId, ing.name, ing.amount || null, ing.unit || null
+      );
     });
 
     // Insert steps
-    const insertStep = db.prepare('INSERT INTO Step (recipeId, stepNumber, instruction) VALUES (?, ?, ?)');
     steps.forEach((step, index) => {
-      insertStep.run(recipeId, step.stepNumber || index + 1, step.instruction);
+      dbHelpers.prepare('INSERT INTO Step (recipeId, stepNumber, instruction) VALUES (?, ?, ?)').run(
+        recipeId, step.stepNumber || index + 1, step.instruction
+      );
     });
 
     // Fetch and return the created recipe
-    const createdRecipe = db.prepare('SELECT * FROM Recipe WHERE id = ?').get(recipeId);
-    const createdIngredients = db.prepare('SELECT * FROM Ingredient WHERE recipeId = ?').all(recipeId);
-    const createdSteps = db.prepare('SELECT * FROM Step WHERE recipeId = ? ORDER BY stepNumber').all(recipeId);
+    const createdRecipe = dbHelpers.prepare(`SELECT * FROM Recipe WHERE id = ${recipeId}`).get() as Recipe;
+    const createdIngredients = dbHelpers.prepare(`SELECT * FROM Ingredient WHERE recipeId = ${recipeId}`).all() as Ingredient[];
+    const createdSteps = dbHelpers.prepare(`SELECT * FROM Step WHERE recipeId = ${recipeId} ORDER BY stepNumber`).all() as Step[];
 
-    res.status(201).json({
+    const recipeWithDetails: RecipeWithDetails = {
       ...createdRecipe,
       isFavorite: Boolean(createdRecipe.isFavorite),
       ingredients: createdIngredients,
-      steps: createdSteps
-    });
+      steps: createdSteps,
+    };
+
+    res.status(201).json(recipeWithDetails);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -339,55 +363,68 @@ router.post('/', (req, res) => {
  *       404:
  *         description: Recipe not found
  */
-router.put('/:id', (req, res) => {
+router.put('/:id', (req: Request<{ id: string }, {}, UpdateRecipeRequest>, res: Response) => {
   try {
     const { id } = req.params;
     const { categoryId, title, description, servings, prepTime, imageUrl, ingredients, steps } = req.body;
 
     // Check if recipe exists
-    const existing = db.prepare('SELECT * FROM Recipe WHERE id = ?').get(id);
+    const existing = dbHelpers.prepare(`SELECT * FROM Recipe WHERE id = ${id}`).get() as Recipe | undefined;
     if (!existing) {
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
     // Update recipe
-    db.prepare(`
+    dbHelpers.prepare(`
       UPDATE Recipe 
       SET categoryId = ?, title = ?, description = ?, servings = ?, prepTime = ?, imageUrl = ?
       WHERE id = ?
-    `).run(categoryId || null, title, description || null, servings || null, prepTime || null, imageUrl || null, id);
+    `).run(
+      categoryId || null,
+      title,
+      description || null,
+      servings || null,
+      prepTime || null,
+      imageUrl || null,
+      parseInt(id, 10)
+    );
 
     // Update ingredients (delete and re-insert)
     if (ingredients) {
-      db.prepare('DELETE FROM Ingredient WHERE recipeId = ?').run(id);
-      const insertIngredient = db.prepare('INSERT INTO Ingredient (recipeId, name, amount, unit) VALUES (?, ?, ?, ?)');
+      dbHelpers.prepare(`DELETE FROM Ingredient WHERE recipeId = ${id}`).run();
       ingredients.forEach(ing => {
-        insertIngredient.run(id, ing.name, ing.amount || null, ing.unit || null);
+        dbHelpers.prepare('INSERT INTO Ingredient (recipeId, name, amount, unit) VALUES (?, ?, ?, ?)').run(
+          parseInt(id, 10), ing.name, ing.amount || null, ing.unit || null
+        );
       });
     }
 
     // Update steps (delete and re-insert)
     if (steps) {
-      db.prepare('DELETE FROM Step WHERE recipeId = ?').run(id);
-      const insertStep = db.prepare('INSERT INTO Step (recipeId, stepNumber, instruction) VALUES (?, ?, ?)');
+      dbHelpers.prepare(`DELETE FROM Step WHERE recipeId = ${id}`).run();
       steps.forEach((step, index) => {
-        insertStep.run(id, step.stepNumber || index + 1, step.instruction);
+        dbHelpers.prepare('INSERT INTO Step (recipeId, stepNumber, instruction) VALUES (?, ?, ?)').run(
+          parseInt(id, 10), step.stepNumber || index + 1, step.instruction
+        );
       });
     }
 
     // Fetch and return the updated recipe
-    const updatedRecipe = db.prepare('SELECT * FROM Recipe WHERE id = ?').get(id);
-    const updatedIngredients = db.prepare('SELECT * FROM Ingredient WHERE recipeId = ?').all(id);
-    const updatedSteps = db.prepare('SELECT * FROM Step WHERE recipeId = ? ORDER BY stepNumber').all(id);
+    const updatedRecipe = dbHelpers.prepare(`SELECT * FROM Recipe WHERE id = ${id}`).get() as Recipe;
+    const updatedIngredients = dbHelpers.prepare(`SELECT * FROM Ingredient WHERE recipeId = ${id}`).all() as Ingredient[];
+    const updatedSteps = dbHelpers.prepare(`SELECT * FROM Step WHERE recipeId = ${id} ORDER BY stepNumber`).all() as Step[];
 
-    res.json({
+    const recipeWithDetails: RecipeWithDetails = {
       ...updatedRecipe,
       isFavorite: Boolean(updatedRecipe.isFavorite),
       ingredients: updatedIngredients,
-      steps: updatedSteps
-    });
+      steps: updatedSteps,
+    };
+
+    res.json(recipeWithDetails);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -410,21 +447,24 @@ router.put('/:id', (req, res) => {
  *       404:
  *         description: Recipe not found
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
-    const existing = db.prepare('SELECT * FROM Recipe WHERE id = ?').get(id);
+    const existing = dbHelpers.prepare(`SELECT * FROM Recipe WHERE id = ${id}`).get() as Recipe | undefined;
     if (!existing) {
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
-    // Ingredients and Steps are deleted automatically due to ON DELETE CASCADE
-    db.prepare('DELETE FROM Recipe WHERE id = ?').run(id);
+    // Delete ingredients and steps first (since sql.js doesn't support CASCADE well)
+    dbHelpers.prepare(`DELETE FROM Ingredient WHERE recipeId = ${id}`).run();
+    dbHelpers.prepare(`DELETE FROM Step WHERE recipeId = ${id}`).run();
+    dbHelpers.prepare(`DELETE FROM Recipe WHERE id = ${id}`).run();
 
     res.json({ message: 'Recipe deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -447,25 +487,28 @@ router.delete('/:id', (req, res) => {
  *       404:
  *         description: Recipe not found
  */
-router.patch('/:id/favorite', (req, res) => {
+router.patch('/:id/favorite', (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
-    const existing = db.prepare('SELECT * FROM Recipe WHERE id = ?').get(id);
+    const existing = dbHelpers.prepare(`SELECT * FROM Recipe WHERE id = ${id}`).get() as Recipe | undefined;
     if (!existing) {
       return res.status(404).json({ error: 'Recipe not found' });
     }
 
     const newFavoriteStatus = existing.isFavorite ? 0 : 1;
-    db.prepare('UPDATE Recipe SET isFavorite = ? WHERE id = ?').run(newFavoriteStatus, id);
+    dbHelpers.prepare(`UPDATE Recipe SET isFavorite = ? WHERE id = ?`).run(newFavoriteStatus, parseInt(id, 10));
 
-    res.json({ 
-      id: Number(id), 
-      isFavorite: Boolean(newFavoriteStatus) 
-    });
+    const response: FavoriteToggleResponse = {
+      id: parseInt(id, 10),
+      isFavorite: Boolean(newFavoriteStatus),
+    };
+
+    res.json(response);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    const err = error as Error;
+    res.status(500).json({ error: err.message });
   }
 });
 
-module.exports = router;
+export default router;

@@ -83,16 +83,26 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-xl text-gray-500">Loading recipes...</div>
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground">Loading recipes...</span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <p className="text-red-600 text-lg">{error}</p>
-        <p className="text-gray-500 mt-2">
+      <div className="bg-card border border-destructive/20 rounded-xl p-8 text-center max-w-lg mx-auto">
+        <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--destructive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+        </div>
+        <p className="text-foreground font-medium mb-2">{error}</p>
+        <p className="text-muted-foreground text-sm">
           Make sure the backend is running on http://localhost:4000
         </p>
       </div>
@@ -101,20 +111,22 @@ export default function HomePage() {
 
   return (
     <div>
+      {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">My Recipes</h1>
-        <p className="text-gray-600">
-          {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} found
+        <h1 className="text-3xl font-bold text-foreground mb-1 text-balance">Explore Recipes</h1>
+        <p className="text-muted-foreground">
+          {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} in your collection
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
+      {/* Filters Bar */}
+      <div className="bg-card rounded-xl border border-border-light p-4 mb-8">
+        <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1">
             <SearchBar onSearch={handleSearch} />
           </div>
 
-          <div className="w-full md:w-64">
+          <div className="w-full md:w-56">
             <CategoryFilter
               categories={categories}
               selectedCategory={selectedCategory}
@@ -124,29 +136,47 @@ export default function HomePage() {
 
           <button
             onClick={handleFavoritesToggle}
-            className={`px-4 py-2 rounded-lg border transition-colors ${
+            className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
               showFavorites
-                ? 'bg-orange-100 border-orange-300 text-orange-700'
-                : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                ? 'bg-primary-light border-primary/30 text-primary'
+                : 'bg-card border-border text-muted-foreground hover:bg-muted'
             }`}
           >
-            {showFavorites ? '★ Favorites' : '☆ Favorites'}
+            <span className="flex items-center gap-1.5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill={showFavorites ? "var(--primary)" : "none"} stroke={showFavorites ? "var(--primary)" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              Favorites
+            </span>
           </button>
         </div>
       </div>
 
+      {/* Recipe Grid */}
       {recipes.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg mb-4">No recipes found</p>
+        <div className="text-center py-16">
+          <div className="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+            </svg>
+          </div>
+          <p className="text-foreground font-medium text-lg mb-2">No recipes found</p>
+          <p className="text-muted-foreground mb-6">Start building your collection</p>
           <Link
             href="/recipes/new"
-            className="inline-block bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-accent transition-colors"
           >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             Create your first recipe
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {recipes.map(recipe => (
             <RecipeCard
               key={recipe.id}

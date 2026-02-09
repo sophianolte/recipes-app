@@ -46,6 +46,11 @@ const swaggerOptions: swaggerJsdoc.Options = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Root Route
+app.get('/', (_req: Request, res: Response) => {
+  res.json({ message: 'Recipes API', docsUrl: '/api-docs' });
+});
+
 // Routes
 app.use('/api/recipes', recipesRouter);
 app.use('/api/categories', categoriesRouter);

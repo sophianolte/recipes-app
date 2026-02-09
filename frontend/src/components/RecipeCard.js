@@ -4,8 +4,8 @@ export default function RecipeCard({ recipe, onToggleFavorite, onDelete }) {
   return (
     <div className="group bg-card rounded-xl border border-border-light overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-200">
       {/* Image placeholder */}
-      <div className="h-40 bg-primary-lighter flex items-center justify-center relative">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
+      <div className="h-40 bg-muted flex items-center justify-center relative">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
           <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
           <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
           <line x1="6" y1="1" x2="6" y2="4" />

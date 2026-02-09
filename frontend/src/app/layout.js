@@ -21,8 +21,10 @@ export default function RootLayout({ children }) {
               <a href="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-                    <path d="M8 12l2-6 4 9 2-3" />
+                    <path d="M7 21h10" />
+                    <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z" />
+                    <path d="M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.13 1.33l-12.4 6.84Z" />
+                    <path d="M13 10.2 6.34 7.06c-.17.98.06 2 .63 2.84" />
                   </svg>
                 </div>
                 <span className="text-lg font-semibold text-foreground">My Recipes</span>

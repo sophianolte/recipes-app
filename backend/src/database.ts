@@ -255,7 +255,7 @@ function seedRecipes(): void {
       description: 'Rich and silky French chocolate mousse that melts in your mouth.',
       servings: 6,
       prepTime: 30,
-      imageUrl: 'https://images.unsplash.com/photo-1541783245831-57d6fb0926d3?w=800',
+      imageUrl: 'https://images.unsplash.com/photo-1590080875852-ba44f83ff2db?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Dark chocolate', amount: '200', unit: 'g' },

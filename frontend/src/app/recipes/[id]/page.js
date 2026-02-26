@@ -91,6 +91,18 @@ export default function RecipeDetailPage() {
         Back to recipes
       </Link>
 
+      {/* Recipe Image */}
+      {recipe.imageUrl && (
+        <div className="rounded-xl overflow-hidden mb-6 max-h-80">
+          <img
+            src={recipe.imageUrl}
+            alt={recipe.title}
+            className="w-full h-80 object-cover"
+            onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+          />
+        </div>
+      )}
+
       {/* Recipe Header */}
       <div className="bg-card rounded-xl border border-border-light p-6 mb-6">
         <div className="flex justify-between items-start mb-4">

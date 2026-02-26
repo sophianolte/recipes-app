@@ -20,6 +20,7 @@ export default function NewRecipePage() {
     categoryId: '',
     servings: '',
     prepTime: '',
+    imageUrl: '',
     ingredients: [{ name: '', amount: '', unit: '' }],
     steps: [{ stepNumber: 1, instruction: '' }],
   });
@@ -124,6 +125,7 @@ export default function NewRecipePage() {
         categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
         servings: formData.servings ? parseInt(formData.servings) : null,
         prepTime: formData.prepTime ? parseInt(formData.prepTime) : null,
+        imageUrl: formData.imageUrl.trim() || null,
         ingredients: validIngredients.map(i => ({
           name: i.name.trim(),
           amount: i.amount.trim() || null,
@@ -201,6 +203,32 @@ export default function NewRecipePage() {
                 className={inputClasses}
                 placeholder="A short description of your recipe..."
               />
+            </div>
+
+            {/* Image URL */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Image URL
+              </label>
+              <input
+                type="url"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                className={inputClasses}
+                placeholder="https://example.com/photo.jpg"
+              />
+              {formData.imageUrl && (
+                <div className="mt-2 rounded-lg overflow-hidden border border-border-light max-h-48">
+                  <img
+                    src={formData.imageUrl}
+                    alt="Preview"
+                    className="w-full h-48 object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                    onLoad={(e) => { e.target.style.display = 'block'; }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Category, Servings, Prep Time */}

@@ -31,10 +31,10 @@ export default function RecipeCard({ recipe, onToggleFavorite, onDelete }) {
         {/* Favorite button overlay */}
         <button
           onClick={() => onToggleFavorite(recipe.id)}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors z-10 ${
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-10 ${
             recipe.isFavorite
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-card/80 backdrop-blur-sm text-muted-foreground hover:bg-card'
+              ? 'bg-primary text-primary-foreground hover:brightness-110'
+              : 'bg-card/80 backdrop-blur-sm text-muted-foreground hover:bg-primary-light hover:text-primary'
           }`}
           title={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >

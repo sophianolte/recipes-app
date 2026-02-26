@@ -160,6 +160,7 @@ interface SeedRecipe {
   description: string;
   servings: number;
   prepTime: number;
+  imageUrl: string | null;
   isFavorite: number;
   ingredients: SeedIngredient[];
   steps: string[];
@@ -174,6 +175,7 @@ function seedRecipes(): void {
       description: 'A classic Italian pasta dish with creamy egg sauce and crispy pancetta.',
       servings: 4,
       prepTime: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Spaghetti', amount: '400', unit: 'g' },
@@ -199,6 +201,7 @@ function seedRecipes(): void {
       description: 'Crisp romaine lettuce with homemade Caesar dressing and crunchy croutons.',
       servings: 2,
       prepTime: 15,
+      imageUrl: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?w=800',
       isFavorite: 0,
       ingredients: [
         { name: 'Romaine lettuce', amount: '1', unit: 'head' },
@@ -224,6 +227,7 @@ function seedRecipes(): void {
       description: 'A comforting homemade tomato soup perfect for cold days.',
       servings: 4,
       prepTime: 35,
+      imageUrl: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Canned tomatoes', amount: '800', unit: 'g' },
@@ -251,6 +255,7 @@ function seedRecipes(): void {
       description: 'Rich and silky French chocolate mousse that melts in your mouth.',
       servings: 6,
       prepTime: 30,
+      imageUrl: 'https://images.unsplash.com/photo-1590080875852-ba44f83ff2db?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Dark chocolate', amount: '200', unit: 'g' },
@@ -277,6 +282,7 @@ function seedRecipes(): void {
       description: 'Classic Italian appetizer with fresh tomatoes, basil, and garlic on toasted bread.',
       servings: 4,
       prepTime: 15,
+      imageUrl: 'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=800',
       isFavorite: 0,
       ingredients: [
         { name: 'Baguette', amount: '1', unit: 'loaf' },
@@ -303,6 +309,7 @@ function seedRecipes(): void {
       description: 'Quick and healthy stir fry with tender chicken and colorful vegetables.',
       servings: 4,
       prepTime: 20,
+      imageUrl: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800',
       isFavorite: 0,
       ingredients: [
         { name: 'Chicken breast', amount: '500', unit: 'g' },
@@ -332,6 +339,7 @@ function seedRecipes(): void {
       description: 'Naturally sweet pancakes made with ripe bananas, perfect for breakfast or snack.',
       servings: 2,
       prepTime: 20,
+      imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Ripe bananas', amount: '2', unit: 'pcs' },
@@ -359,6 +367,7 @@ function seedRecipes(): void {
       description: 'Fresh Mediterranean salad with feta cheese, olives, and oregano dressing.',
       servings: 4,
       prepTime: 10,
+      imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800',
       isFavorite: 0,
       ingredients: [
         { name: 'Cucumber', amount: '1', unit: 'large' },
@@ -387,6 +396,7 @@ function seedRecipes(): void {
       description: 'Refreshing and healthy smoothie with mango, banana, and coconut milk.',
       servings: 2,
       prepTime: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=800',
       isFavorite: 0,
       ingredients: [
         { name: 'Mango', amount: '1', unit: 'large' },
@@ -412,6 +422,7 @@ function seedRecipes(): void {
       description: 'Flavorful ground beef tacos with fresh toppings and homemade seasoning.',
       servings: 4,
       prepTime: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800',
       isFavorite: 1,
       ingredients: [
         { name: 'Ground beef', amount: '500', unit: 'g' },
@@ -441,8 +452,8 @@ function seedRecipes(): void {
   // Insert each recipe with its ingredients and steps
   for (const recipe of recipes) {
     db.run(
-      'INSERT INTO Recipe (categoryId, title, description, servings, prepTime, isFavorite) VALUES (?, ?, ?, ?, ?, ?)',
-      [recipe.categoryId, recipe.title, recipe.description, recipe.servings, recipe.prepTime, recipe.isFavorite]
+      'INSERT INTO Recipe (categoryId, title, description, servings, prepTime, imageUrl, isFavorite) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [recipe.categoryId, recipe.title, recipe.description, recipe.servings, recipe.prepTime, recipe.imageUrl, recipe.isFavorite]
     );
 
     const lastIdResult = db.exec('SELECT last_insert_rowid()');

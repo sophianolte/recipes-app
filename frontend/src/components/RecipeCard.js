@@ -3,22 +3,38 @@ import Link from 'next/link';
 export default function RecipeCard({ recipe, onToggleFavorite, onDelete }) {
   return (
     <div className="group bg-card rounded-xl border border-border-light overflow-hidden hover:border-primary/30 hover:shadow-md transition-all duration-200">
-      {/* Image placeholder */}
-      <div className="h-40 bg-muted flex items-center justify-center relative">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
-          <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-          <line x1="6" y1="1" x2="6" y2="4" />
-          <line x1="10" y1="1" x2="10" y2="4" />
-          <line x1="14" y1="1" x2="14" y2="4" />
-        </svg>
+      {/* Image or placeholder */}
+      <div className="h-40 bg-muted flex items-center justify-center relative overflow-hidden">
+        {recipe.imageUrl ? (
+          <img
+            src={recipe.imageUrl}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div
+          className="w-full h-full flex items-center justify-center absolute inset-0"
+          style={{ display: recipe.imageUrl ? 'none' : 'flex' }}
+        >
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+            <line x1="6" y1="1" x2="6" y2="4" />
+            <line x1="10" y1="1" x2="10" y2="4" />
+            <line x1="14" y1="1" x2="14" y2="4" />
+          </svg>
+        </div>
         {/* Favorite button overlay */}
         <button
           onClick={() => onToggleFavorite(recipe.id)}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-10 ${
             recipe.isFavorite
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-card/80 backdrop-blur-sm text-muted-foreground hover:bg-card'
+              ? 'bg-primary text-primary-foreground hover:brightness-110'
+              : 'bg-card/80 backdrop-blur-sm text-muted-foreground hover:bg-primary-light hover:text-primary'
           }`}
           title={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >

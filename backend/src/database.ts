@@ -114,10 +114,10 @@ export const dbHelpers = {
       if (result.length === 0) return [];
       
       const columns = result[0].columns;
-      return result[0].values.map(row => {
+      return result[0].values.map((row: { [x: string]: any; }) => {
         const obj: any = {};
-        columns.forEach((col, i) => {
-          obj[col] = row[i];
+        columns.forEach((col: string | number, i: number) => {
+          obj[col as string] = row[i];
         });
         return obj;
       });
@@ -129,8 +129,8 @@ export const dbHelpers = {
       const columns = result[0].columns;
       const row = result[0].values[0];
       const obj: any = {};
-      columns.forEach((col, i) => {
-        obj[col] = row[i];
+      columns.forEach((col: string | number, i: number) => {
+        obj[col as string] = row[i];
       });
       return obj;
     },

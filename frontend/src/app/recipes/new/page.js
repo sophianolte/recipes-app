@@ -21,6 +21,7 @@ export default function NewRecipePage() {
     servings: '',
     prepTime: '',
     imageUrl: '',
+    isPublic: false,
     ingredients: [{ name: '', amount: '', unit: '' }],
     steps: [{ stepNumber: 1, instruction: '' }],
   });
@@ -126,6 +127,7 @@ export default function NewRecipePage() {
         servings: formData.servings ? parseInt(formData.servings) : null,
         prepTime: formData.prepTime ? parseInt(formData.prepTime) : null,
         imageUrl: formData.imageUrl.trim() || null,
+        isPublic: formData.isPublic,
         ingredients: validIngredients.map(i => ({
           name: i.name.trim(),
           amount: i.amount.trim() || null,
@@ -280,6 +282,31 @@ export default function NewRecipePage() {
                   className={inputClasses}
                   placeholder="30"
                 />
+              </div>
+            </div>
+
+            {/* Visibility Toggle */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isPublic: !formData.isPublic })}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  formData.isPublic ? 'bg-primary' : 'bg-border'
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                  formData.isPublic ? 'translate-x-5' : ''
+                }`} />
+              </button>
+              <div>
+                <span className="text-sm font-medium text-foreground">
+                  {formData.isPublic ? 'Public' : 'Private'}
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  {formData.isPublic
+                    ? 'Other users can see this recipe'
+                    : 'Only you can see this recipe'}
+                </p>
               </div>
             </div>
           </div>

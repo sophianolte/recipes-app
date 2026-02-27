@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getRecipe, updateRecipe, getCategories } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 const inputClasses = "w-full px-4 py-2.5 border border-border rounded-lg bg-card text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/20 focus:border-primary outline-none transition-colors";
 
 export default function EditRecipePage() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,6 +38,11 @@ export default function EditRecipePage() {
           getRecipe(params.id),
           getCategories(),
         ]);
+
+        if (recipeData.userId !== user?.id) {
+          router.replace(`/recipes/${params.id}`);
+          return;
+        }
 
         setCategories(categoriesData);
         setFormData({

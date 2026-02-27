@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { initializeDatabase } from './database';
 import recipesRouter from './routes/recipes';
 import categoriesRouter from './routes/categories';
+import authRouter from './routes/auth';
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '4000', 10);
@@ -47,6 +48,7 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
+app.use('/api/auth', authRouter);
 app.use('/api/recipes', recipesRouter);
 app.use('/api/categories', categoriesRouter);
 

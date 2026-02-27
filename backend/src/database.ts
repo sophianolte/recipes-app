@@ -222,73 +222,73 @@ function seedGlobalRecipes(): void {
 function seedPrivateRecipes(): void {
   // pascal (userId=1)
   const p1: SeedRecipe[] = [
-    { categoryId:2, userId:1, isPublic:0, title:"Pascal's Cutlet", description:'Crispy Viennese cutlet following a family recipe.', servings:2, prepTime:30, imageUrl:null,
+    { categoryId:2, userId:1, isPublic:0, title:"Pascal's Cutlet", description:'Crispy Viennese cutlet following a family recipe.', servings:2, prepTime:30, imageUrl:'https://images.unsplash.com/photo-1599921841143-819065a55cc6?q=80&w=800',
       ingredients:[{name:'Veal cutlet',amount:'2',unit:'pcs'},{name:'Flour',amount:'100',unit:'g'},{name:'Eggs',amount:'2',unit:'pcs'},{name:'Breadcrumbs',amount:'150',unit:'g'},{name:'Clarified butter',amount:'100',unit:'g'},{name:'Lemon',amount:'1',unit:'pc'}],
       steps:['Pound cutlet flat, season with salt and pepper.','Coat in flour, egg, and breadcrumbs.','Fry in hot clarified butter until golden brown.','Serve with lemon.'] },
-    { categoryId:2, userId:1, isPublic:1, title:'Potato Gratin', description:'Creamy potato gratin with melted cheese.', servings:4, prepTime:50, imageUrl:null,
+    { categoryId:2, userId:1, isPublic:1, title:'Potato Gratin', description:'Creamy potato gratin with melted cheese.', servings:4, prepTime:50, imageUrl:'https://plus.unsplash.com/premium_photo-1667233385688-fe3618a52ac5?q=80&w=800',
       ingredients:[{name:'Potatoes',amount:'1',unit:'kg'},{name:'Heavy cream',amount:'200',unit:'ml'},{name:'Gouda',amount:'200',unit:'g'},{name:'Garlic',amount:'2',unit:'cloves'},{name:'Nutmeg',amount:'1',unit:'pinch'},{name:'Butter',amount:'30',unit:'g'}],
       steps:['Peel and thinly slice potatoes.','Grease baking dish with butter.','Layer potatoes and pour cream over.','Distribute garlic and nutmeg.','Cover with cheese and bake at 180°C for 40 min.'] },
-    { categoryId:3, userId:1, isPublic:0, title:'Quark Dessert', description:'Light quark dessert with fresh berries.', servings:2, prepTime:10, imageUrl:null,
+    { categoryId:3, userId:1, isPublic:0, title:'Quark Dessert', description:'Light quark dessert with fresh berries.', servings:2, prepTime:10, imageUrl:'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800',
       ingredients:[{name:'Low-fat quark',amount:'500',unit:'g'},{name:'Milk',amount:'100',unit:'ml'},{name:'Honey',amount:'2',unit:'tbsp'},{name:'Vanilla sugar',amount:'1',unit:'packet'},{name:'Mixed berries',amount:'200',unit:'g'}],
       steps:['Mix quark smooth with milk.','Stir in honey and vanilla sugar.','Wash berries and fold in.','Serve chilled.'] },
-    { categoryId:6, userId:1, isPublic:0, title:"Pascal's Power Muesli", description:'Energy-rich breakfast muesli.', servings:1, prepTime:5, imageUrl:null,
+    { categoryId:6, userId:1, isPublic:0, title:"Pascal's Power Muesli", description:'Energy-rich breakfast muesli.', servings:1, prepTime:5, imageUrl:'https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=800',
       ingredients:[{name:'Oats',amount:'80',unit:'g'},{name:'Yogurt',amount:'150',unit:'g'},{name:'Walnuts',amount:'30',unit:'g'},{name:'Raisins',amount:'20',unit:'g'},{name:'Honey',amount:'1',unit:'tbsp'},{name:'Banana',amount:'1',unit:'pc'}],
       steps:['Put oats in a bowl.','Add yogurt on top.','Top with nuts, raisins, and banana.','Drizzle with honey.'] },
-    { categoryId:4, userId:1, isPublic:1, title:'Goulash Soup', description:'Hearty Hungarian goulash soup.', servings:6, prepTime:90, imageUrl:null,
+    { categoryId:4, userId:1, isPublic:1, title:'Goulash Soup', description:'Hearty Hungarian goulash soup.', servings:6, prepTime:90, imageUrl:'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
       ingredients:[{name:'Beef',amount:'500',unit:'g'},{name:'Onions',amount:'3',unit:'pcs'},{name:'Sweet paprika',amount:'3',unit:'tbsp'},{name:'Potatoes',amount:'400',unit:'g'},{name:'Tomato paste',amount:'2',unit:'tbsp'},{name:'Beef broth',amount:'1',unit:'l'}],
       steps:['Dice beef and onions.','Sauté onions, stir in paprika.','Brown the meat.','Stir in tomato paste, deglaze with broth.','Simmer for 60 min, add potatoes.','Cook for another 20 min.'] }
   ];
   // Alex (userId=2)
   const p2: SeedRecipe[] = [
-    { categoryId:2, userId:2, isPublic:0, title:"Alex's Pad Thai", description:'Authentic pad thai with shrimp.', servings:2, prepTime:25, imageUrl:null,
+    { categoryId:2, userId:2, isPublic:0, title:"Alex's Pad Thai", description:'Authentic pad thai with shrimp.', servings:2, prepTime:25, imageUrl:'https://images.unsplash.com/photo-1655091273851-7bdc2e578a88?q=80&w=800',
       ingredients:[{name:'Rice noodles',amount:'200',unit:'g'},{name:'Shrimp',amount:'200',unit:'g'},{name:'Peanuts',amount:'50',unit:'g'},{name:'Lime',amount:'1',unit:'pc'},{name:'Fish sauce',amount:'3',unit:'tbsp'},{name:'Eggs',amount:'2',unit:'pcs'}],
       steps:['Soak rice noodles.','Sauté shrimp.','Scramble eggs.','Toss everything together.','Serve with peanuts and lime.'] },
-    { categoryId:3, userId:2, isPublic:1, title:'Tiramisu Classico', description:'Classic Italian tiramisu with mascarpone.', servings:6, prepTime:30, imageUrl:null,
+    { categoryId:3, userId:2, isPublic:1, title:'Tiramisu Classico', description:'Classic Italian tiramisu with mascarpone.', servings:6, prepTime:30, imageUrl:'https://images.unsplash.com/photo-1712262582593-e13609aaf12b?q=80&w=800',
       ingredients:[{name:'Mascarpone',amount:'500',unit:'g'},{name:'Ladyfingers',amount:'200',unit:'g'},{name:'Espresso',amount:'300',unit:'ml'},{name:'Eggs',amount:'4',unit:'pcs'},{name:'Sugar',amount:'100',unit:'g'},{name:'Cocoa powder',amount:'2',unit:'tbsp'}],
       steps:['Whisk egg yolks with sugar until fluffy.','Fold in mascarpone.','Beat egg whites stiff and fold in.','Dip ladyfingers in espresso and layer.','Cover with cream, repeat.','Chill for 4 hours, dust with cocoa.'] },
-    { categoryId:5, userId:2, isPublic:0, title:'Avocado Bowl', description:'Fresh Buddha bowl with avocado and quinoa.', servings:2, prepTime:20, imageUrl:null,
+    { categoryId:5, userId:2, isPublic:0, title:'Avocado Bowl', description:'Fresh Buddha bowl with avocado and quinoa.', servings:2, prepTime:20, imageUrl:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
       ingredients:[{name:'Quinoa',amount:'150',unit:'g'},{name:'Avocado',amount:'1',unit:'pc'},{name:'Edamame',amount:'100',unit:'g'},{name:'Carrots',amount:'2',unit:'pcs'},{name:'Sesame',amount:'1',unit:'tbsp'},{name:'Soy sauce',amount:'2',unit:'tbsp'}],
       steps:['Cook quinoa and let cool.','Slice avocado, grate carrots.','Cook edamame.','Arrange in a bowl.','Drizzle with soy sauce and sesame.'] },
-    { categoryId:7, userId:2, isPublic:1, title:'Matcha Latte', description:'Creamy matcha latte.', servings:1, prepTime:5, imageUrl:null,
+    { categoryId:7, userId:2, isPublic:1, title:'Matcha Latte', description:'Creamy matcha latte.', servings:1, prepTime:5, imageUrl:'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?q=80&w=800',
       ingredients:[{name:'Matcha powder',amount:'2',unit:'g'},{name:'Hot water',amount:'80',unit:'ml'},{name:'Milk',amount:'200',unit:'ml'},{name:'Honey',amount:'1',unit:'tsp'}],
       steps:['Brew matcha with hot water.','Whisk until frothy.','Froth the milk.','Pour matcha in cup, add milk on top.'] },
-    { categoryId:1, userId:2, isPublic:0, title:'Hummus Deluxe', description:'Homemade hummus with pine nuts.', servings:4, prepTime:15, imageUrl:null,
+    { categoryId:1, userId:2, isPublic:0, title:'Hummus Deluxe', description:'Homemade hummus with pine nuts.', servings:4, prepTime:15, imageUrl:'https://images.unsplash.com/photo-1541014741259-de529411b96a?w=800',
       ingredients:[{name:'Chickpeas',amount:'400',unit:'g'},{name:'Tahini',amount:'3',unit:'tbsp'},{name:'Lemon juice',amount:'2',unit:'tbsp'},{name:'Garlic',amount:'2',unit:'cloves'},{name:'Olive oil',amount:'3',unit:'tbsp'},{name:'Pine nuts',amount:'30',unit:'g'}],
       steps:['Blend chickpeas with tahini, lemon, and garlic.','Work in olive oil.','Toast pine nuts.','Top with pine nuts and oil.'] }
   ];
   // Twan (userId=3)
   const p3: SeedRecipe[] = [
-    { categoryId:2, userId:3, isPublic:1, title:'Bami Goreng', description:'Indonesian fried noodle dish.', servings:4, prepTime:25, imageUrl:null,
+    { categoryId:2, userId:3, isPublic:1, title:'Bami Goreng', description:'Indonesian fried noodle dish.', servings:4, prepTime:25, imageUrl:'https://plus.unsplash.com/premium_photo-1694707235544-c9f6884d77d8?q=80&w=800',
       ingredients:[{name:'Egg noodles',amount:'300',unit:'g'},{name:'Chicken breast',amount:'300',unit:'g'},{name:'Kecap Manis',amount:'4',unit:'tbsp'},{name:'Garlic',amount:'3',unit:'cloves'},{name:'Pointed cabbage',amount:'200',unit:'g'},{name:'Spring onions',amount:'3',unit:'pcs'}],
       steps:['Cook noodles.','Sauté chicken.','Add garlic and cabbage.','Add noodles and kecap manis.','Garnish with spring onions.'] },
-    { categoryId:6, userId:3, isPublic:0, title:"Twan's Cheese Toast", description:'Cheesy melted toast.', servings:2, prepTime:10, imageUrl:null,
+    { categoryId:6, userId:3, isPublic:0, title:"Twan's Cheese Toast", description:'Cheesy melted toast.', servings:2, prepTime:10, imageUrl:'https://plus.unsplash.com/premium_photo-1739907121476-9dffe9e7578e?q=80&w=800',
       ingredients:[{name:'Toast bread',amount:'4',unit:'slices'},{name:'Gouda',amount:'100',unit:'g'},{name:'Tomatoes',amount:'2',unit:'pcs'},{name:'Oregano',amount:'1',unit:'tsp'},{name:'Butter',amount:'20',unit:'g'}],
       steps:['Spread butter on toast.','Place tomatoes on top.','Add cheese and oregano.','Bake at 200°C until melted.'] },
-    { categoryId:3, userId:3, isPublic:1, title:'Panna Cotta', description:'Italian panna cotta with berry sauce.', servings:4, prepTime:20, imageUrl:null,
+    { categoryId:3, userId:3, isPublic:1, title:'Panna Cotta', description:'Italian panna cotta with berry sauce.', servings:4, prepTime:20, imageUrl:'https://plus.unsplash.com/premium_photo-1713551474564-c3916a5eb3bf?q=80&w=800',
       ingredients:[{name:'Heavy cream',amount:'500',unit:'ml'},{name:'Sugar',amount:'80',unit:'g'},{name:'Gelatin',amount:'3',unit:'sheets'},{name:'Vanilla bean',amount:'1',unit:'pc'},{name:'Mixed berries',amount:'200',unit:'g'}],
       steps:['Soak gelatin.','Bring cream with sugar and vanilla to a boil.','Stir in gelatin.','Pour into molds, chill for 4 hours.','Blend berries into a sauce.'] },
-    { categoryId:4, userId:3, isPublic:0, title:'Tom Kha Gai', description:'Thai coconut soup.', servings:4, prepTime:30, imageUrl:null,
+    { categoryId:4, userId:3, isPublic:0, title:'Tom Kha Gai', description:'Thai coconut soup.', servings:4, prepTime:30, imageUrl:'https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800',
       ingredients:[{name:'Coconut milk',amount:'400',unit:'ml'},{name:'Chicken breast',amount:'300',unit:'g'},{name:'Mushrooms',amount:'150',unit:'g'},{name:'Lime juice',amount:'3',unit:'tbsp'},{name:'Fish sauce',amount:'2',unit:'tbsp'},{name:'Chili',amount:'2',unit:'pcs'}],
       steps:['Heat coconut milk.','Add chicken in strips.','Quarter mushrooms and add.','Simmer for 15 min.','Season with fish sauce, lime, and chili.'] },
-    { categoryId:2, userId:3, isPublic:0, title:'Nasi Goreng', description:'Indonesian fried rice.', servings:2, prepTime:20, imageUrl:null,
+    { categoryId:2, userId:3, isPublic:0, title:'Nasi Goreng', description:'Indonesian fried rice.', servings:2, prepTime:20, imageUrl:'https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=800',
       ingredients:[{name:'Rice (day-old)',amount:'400',unit:'g'},{name:'Eggs',amount:'2',unit:'pcs'},{name:'Sambal Oelek',amount:'2',unit:'tsp'},{name:'Kecap Manis',amount:'3',unit:'tbsp'},{name:'Onion',amount:'1',unit:'pc'},{name:'Shrimp',amount:'100',unit:'g'}],
       steps:['Sauté onion.','Add shrimp.','Fry rice on high heat.','Stir in sambal and kecap manis.','Top with fried eggs.'] }
   ];
   // Sophia (userId=4)
   const p4: SeedRecipe[] = [
-    { categoryId:3, userId:4, isPublic:1, title:"Sophia's Crème Brûlée", description:'Classic French crème brûlée.', servings:4, prepTime:45, imageUrl:null,
+    { categoryId:3, userId:4, isPublic:1, title:"Sophia's Crème Brûlée", description:'Classic French crème brûlée.', servings:4, prepTime:45, imageUrl:'https://images.unsplash.com/photo-1676300184943-09b2a08319a3?q=80&w=800',
       ingredients:[{name:'Heavy cream',amount:'400',unit:'ml'},{name:'Egg yolks',amount:'5',unit:'pcs'},{name:'Sugar',amount:'100',unit:'g'},{name:'Vanilla bean',amount:'1',unit:'pc'},{name:'Cane sugar',amount:'4',unit:'tbsp'}],
       steps:['Bring cream with vanilla to a boil.','Whisk egg yolks with sugar until fluffy.','Slowly stir in cream.','Bake in a water bath at 160°C for 35 min.','Let cool, caramelize with cane sugar.'] },
-    { categoryId:5, userId:4, isPublic:0, title:'Mediterranean Quinoa Salad', description:'Colorful Mediterranean quinoa salad.', servings:4, prepTime:25, imageUrl:null,
+    { categoryId:5, userId:4, isPublic:0, title:'Mediterranean Quinoa Salad', description:'Colorful Mediterranean quinoa salad.', servings:4, prepTime:25, imageUrl:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
       ingredients:[{name:'Quinoa',amount:'200',unit:'g'},{name:'Sun-dried tomatoes',amount:'80',unit:'g'},{name:'Olives',amount:'50',unit:'g'},{name:'Feta',amount:'100',unit:'g'},{name:'Arugula',amount:'50',unit:'g'},{name:'Balsamic vinegar',amount:'2',unit:'tbsp'}],
       steps:['Cook quinoa and let cool.','Chop tomatoes.','Mix everything together.','Crumble feta on top.','Dress with balsamic and olive oil.'] },
-    { categoryId:7, userId:4, isPublic:1, title:'Golden Milk', description:'Warming golden milk with turmeric.', servings:1, prepTime:10, imageUrl:null,
+    { categoryId:7, userId:4, isPublic:1, title:'Golden Milk', description:'Warming golden milk with turmeric.', servings:1, prepTime:10, imageUrl:'https://plus.unsplash.com/premium_photo-1672076780992-7629039b1739?q=80&w=800',
       ingredients:[{name:'Oat milk',amount:'250',unit:'ml'},{name:'Turmeric',amount:'1',unit:'tsp'},{name:'Fresh ginger',amount:'1',unit:'cm'},{name:'Cinnamon',amount:'0.5',unit:'tsp'},{name:'Honey',amount:'1',unit:'tsp'},{name:'Black pepper',amount:'1',unit:'pinch'}],
       steps:['Grate ginger.','Warm oat milk.','Stir in spices.','Let simmer.','Sweeten with honey.'] },
-    { categoryId:1, userId:4, isPublic:0, title:'Zucchini Fritters', description:'Crispy zucchini fritters.', servings:4, prepTime:20, imageUrl:null,
+    { categoryId:1, userId:4, isPublic:0, title:'Zucchini Fritters', description:'Crispy zucchini fritters.', servings:4, prepTime:20, imageUrl:'https://images.unsplash.com/photo-1692742246345-c6e7f28ae345?q=80&w=800',
       ingredients:[{name:'Zucchini',amount:'2',unit:'pcs'},{name:'Eggs',amount:'2',unit:'pcs'},{name:'Flour',amount:'80',unit:'g'},{name:'Parmesan',amount:'50',unit:'g'},{name:'Quark',amount:'200',unit:'g'},{name:'Fresh herbs',amount:'1',unit:'bunch'}],
       steps:['Grate zucchini and squeeze out moisture.','Mix with eggs, flour, and parmesan.','Fry fritters until golden brown.','Mix quark with herbs.','Serve together.'] },
-    { categoryId:2, userId:4, isPublic:0, title:'Sweet Potato Curry', description:'Creamy vegan curry.', servings:4, prepTime:35, imageUrl:null,
+    { categoryId:2, userId:4, isPublic:0, title:'Sweet Potato Curry', description:'Creamy vegan curry.', servings:4, prepTime:35, imageUrl:'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800',
       ingredients:[{name:'Sweet potatoes',amount:'600',unit:'g'},{name:'Coconut milk',amount:'400',unit:'ml'},{name:'Curry paste',amount:'2',unit:'tbsp'},{name:'Spinach',amount:'200',unit:'g'},{name:'Chickpeas',amount:'1',unit:'can'},{name:'Basmati rice',amount:'300',unit:'g'}],
       steps:['Dice sweet potatoes.','Toast curry paste.','Deglaze with coconut milk.','Simmer for 20 min.','Fold in chickpeas and spinach.','Serve with rice.'] }
   ];

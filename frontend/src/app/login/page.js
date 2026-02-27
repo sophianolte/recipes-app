@@ -101,16 +101,6 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* Hint */}
-        <div className="mt-4 bg-primary-light rounded-xl p-4 text-sm">
-          <p className="font-medium text-primary mb-2">Available users:</p>
-          <div className="grid grid-cols-2 gap-1 text-muted-foreground">
-            <span>pascal / pascal123</span>
-            <span>alex / alex123</span>
-            <span>twan / twan123</span>
-            <span>sophia / sophia123</span>
-          </div>
-        </div>
       </div>
     </div>
   );

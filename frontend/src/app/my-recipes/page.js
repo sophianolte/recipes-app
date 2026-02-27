@@ -85,27 +85,16 @@ export default function MyRecipesPage() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary-light rounded-lg flex items-center justify-center">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">My Recipes</h1>
-            <p className="text-sm text-muted-foreground">{filtered.length} of {recipes.length} own recipes</p>
-          </div>
-        </div>
-        <Link
-          href="/recipes/new"
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-accent transition-colors"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 bg-primary-light rounded-lg flex items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
-          New Recipe
-        </Link>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">My Recipes</h1>
+          <p className="text-sm text-muted-foreground">{filtered.length} of {recipes.length} own recipes</p>
+        </div>
       </div>
 
       {/* Filter Bar */}

@@ -9,6 +9,34 @@ const api = axios.create({
   },
 });
 
+// Add userId header to every request
+function getUserId() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem('recipeUser');
+    if (stored) {
+      const user = JSON.parse(stored);
+      return user.id;
+    }
+  } catch {}
+  return null;
+}
+
+api.interceptors.request.use((config) => {
+  const userId = getUserId();
+  if (userId) {
+    config.headers['X-User-Id'] = userId;
+  }
+  return config;
+});
+
+// ============ AUTH ============
+
+export async function login(username, password) {
+  const response = await api.post('/auth/login', { username, password });
+  return response.data;
+}
+
 // ============ RECIPES ============
 
 export async function getRecipes(params = {}) {
@@ -23,6 +51,16 @@ export async function getRecipes(params = {}) {
   const url = query ? `/recipes?${query}` : '/recipes';
   
   const response = await api.get(url);
+  return response.data;
+}
+
+export async function getMyRecipes() {
+  const response = await api.get('/recipes/my');
+  return response.data;
+}
+
+export async function getOthersPublicRecipes() {
+  const response = await api.get('/recipes/others-public');
   return response.data;
 }
 
@@ -48,6 +86,11 @@ export async function deleteRecipe(id) {
 
 export async function toggleFavorite(id) {
   const response = await api.patch(`/recipes/${id}/favorite`);
+  return response.data;
+}
+
+export async function toggleVisibility(id) {
+  const response = await api.patch(`/recipes/${id}/visibility`);
   return response.data;
 }
 

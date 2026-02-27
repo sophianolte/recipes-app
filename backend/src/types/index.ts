@@ -1,5 +1,13 @@
 // ============ DATABASE TYPES ============
 
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+  displayName: string;
+  createdAt: string;
+}
+
 export interface Category {
   id: number;
   name: string;
@@ -9,14 +17,23 @@ export interface Category {
 export interface Recipe {
   id: number;
   categoryId: number | null;
+  userId: number | null;
   title: string;
   description: string | null;
   servings: number | null;
   prepTime: number | null;
   imageUrl: string | null;
   isFavorite: number | boolean;
+  isPublic: number | boolean;
   createdAt: string;
   categoryName?: string;
+  ownerName?: string;
+}
+
+export interface UserFavorite {
+  id: number;
+  userId: number;
+  recipeId: number;
 }
 
 export interface Ingredient {
@@ -36,6 +53,11 @@ export interface Step {
 
 // ============ API REQUEST TYPES ============
 
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
 export interface CreateRecipeRequest {
   categoryId?: number | null;
   title: string;
@@ -43,6 +65,7 @@ export interface CreateRecipeRequest {
   servings?: number | null;
   prepTime?: number | null;
   imageUrl?: string | null;
+  isPublic?: boolean;
   ingredients: IngredientInput[];
   steps: StepInput[];
 }
@@ -94,4 +117,11 @@ export interface FavoriteToggleResponse {
 
 export interface CountResult {
   count: number;
+}
+
+// ============ AUTH TYPES ============
+
+export interface AuthenticatedRequest {
+  userId?: number;
+  username?: string;
 }

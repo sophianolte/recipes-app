@@ -1,190 +1,177 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { getRecipes, getCategories, toggleFavorite, deleteRecipe } from '@/lib/api';
+import { getRecipes, getMyRecipes, getOthersPublicRecipes, toggleFavorite } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 import RecipeCard from '@/components/RecipeCard';
-import CategoryFilter from '@/components/CategoryFilter';
 import SearchBar from '@/components/SearchBar';
 
 export default function HomePage() {
-  const [recipes, setRecipes] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const [results, setResults] = useState(null);
+  const [activeSearch, setActiveSearch] = useState('');
+  const [searching, setSearching] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [recipesData, categoriesData] = await Promise.all([
-          getRecipes({
-            categoryId: selectedCategory,
-            search: searchTerm,
-            favorite: showFavorites,
-          }),
-          getCategories(),
-        ]);
-
-        setRecipes(recipesData);
-        setCategories(categoriesData);
-      } catch (err) {
-        setError('Failed to load recipes. Is the backend running?');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  async function handleSearch(term) {
+    if (!term.trim()) {
+      setResults(null);
+      setActiveSearch('');
+      return;
     }
-
-    fetchData();
-  }, [selectedCategory, searchTerm, showFavorites]);
+    setActiveSearch(term);
+    setSearching(true);
+    try {
+      const [common, my, others] = await Promise.all([
+        getRecipes(),
+        getMyRecipes(),
+        getOthersPublicRecipes(),
+      ]);
+      const match = (r) => r.title.toLowerCase().includes(term.toLowerCase());
+      setResults({
+        common: common.filter(match),
+        my: my.filter(match),
+        community: others.filter(match),
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearching(false);
+    }
+  }
 
   async function handleToggleFavorite(id) {
     try {
       const result = await toggleFavorite(id);
-      setRecipes(recipes.map(recipe => 
-        recipe.id === id ? { ...recipe, isFavorite: result.isFavorite } : recipe
-      ));
+      if (!results) return;
+      const update = (list) => list.map((r) => r.id === id ? { ...r, isFavorite: result.isFavorite } : r);
+      setResults({ common: update(results.common), my: update(results.my), community: update(results.community) });
     } catch (err) {
-      console.error('Failed to toggle favorite:', err);
+      console.error(err);
     }
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Are you sure you want to delete this recipe?')) {
-      return;
-    }
-
-    try {
-      await deleteRecipe(id);
-      setRecipes(recipes.filter(recipe => recipe.id !== id));
-    } catch (err) {
-      console.error('Failed to delete recipe:', err);
-    }
-  }
-
-  function handleSearch(term) {
-    setSearchTerm(term);
-  }
-
-  function handleCategoryChange(categoryId) {
-    setSelectedCategory(categoryId);
-  }
-
-  function handleFavoritesToggle() {
-    setShowFavorites(!showFavorites);
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <span className="text-muted-foreground">Loading recipes...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-card border border-destructive/20 rounded-xl p-8 text-center max-w-lg mx-auto">
-        <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--destructive)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-          </svg>
-        </div>
-        <p className="text-foreground font-medium mb-2">{error}</p>
-        <p className="text-muted-foreground text-sm">
-          Make sure the backend is running on http://localhost:4000
-        </p>
-      </div>
-    );
-  }
+  const totalResults = results ? results.common.length + results.my.length + results.community.length : 0;
 
   return (
-    <div>
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-1 text-balance">Explore Recipes</h1>
-        <p className="text-muted-foreground">
-          {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'} in your collection
+    <div className="max-w-4xl mx-auto">
+      {/* Hero */}
+      <div className="text-center py-10 mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">
+          Hello, {user?.displayName}!
+        </h1>
+        <p className="text-muted-foreground text-lg mb-8">
+          Welcome to your recipe collection
         </p>
-      </div>
 
-      {/* Filters Bar */}
-      <div className="bg-card rounded-xl border border-border-light p-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="flex-1">
-            <SearchBar onSearch={handleSearch} />
-          </div>
-
-          <div className="w-full md:w-56">
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onChange={handleCategoryChange}
-            />
-          </div>
-
-          <button
-            onClick={handleFavoritesToggle}
-            className={`px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors ${
-              showFavorites
-                ? 'bg-primary-light border-primary/30 text-primary'
-                : 'bg-card border-border text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            <span className="flex items-center gap-1.5">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill={showFavorites ? "var(--primary)" : "none"} stroke={showFavorites ? "var(--primary)" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        {/* Quick Nav Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <Link href="/common" className="group bg-card border border-border-light rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all text-left">
+            <div className="w-10 h-10 bg-primary-light rounded-lg flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
               </svg>
-              Favorites
-            </span>
-          </button>
-        </div>
-      </div>
+            </div>
+            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">Common Recipes</h3>
+            <p className="text-sm text-muted-foreground">Recipes available for everyone</p>
+          </Link>
 
-      {/* Recipe Grid */}
-      {recipes.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-16 h-16 bg-primary-light rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
-              <line x1="12" y1="8" x2="12" y2="16" />
-              <line x1="8" y1="12" x2="16" y2="12" />
-            </svg>
-          </div>
-          <p className="text-foreground font-medium text-lg mb-2">No recipes found</p>
-          <p className="text-muted-foreground mb-6">Start building your collection</p>
-          <Link
-            href="/recipes/new"
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-accent transition-colors"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Create your first recipe
+          <Link href="/my-recipes" className="group bg-card border border-border-light rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all text-left">
+            <div className="w-10 h-10 bg-primary-light rounded-lg flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">My Recipes</h3>
+            <p className="text-sm text-muted-foreground">Your personal recipe collection</p>
+          </Link>
+
+          <Link href="/community" className="group bg-card border border-border-light rounded-xl p-5 hover:border-primary/40 hover:shadow-md transition-all text-left">
+            <div className="w-10 h-10 bg-primary-light rounded-lg flex items-center justify-center mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1">Community Recipes</h3>
+            <p className="text-sm text-muted-foreground">Recipes shared by other users</p>
           </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {recipes.map(recipe => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={handleDelete}
-            />
-          ))}
+
+        {/* Global Search */}
+        <div className="max-w-xl mx-auto">
+          <p className="text-sm text-muted-foreground mb-3">Search across all recipe sections</p>
+          <SearchBar onSearch={handleSearch} />
+        </div>
+      </div>
+
+      {/* Search Results */}
+      {searching && (
+        <div className="flex justify-center items-center py-12">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <span className="text-muted-foreground">Searching...</span>
+          </div>
+        </div>
+      )}
+
+      {results && !searching && (
+        <div>
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border-light">
+            <span className="text-foreground font-medium">
+              {totalResults === 0
+                ? `No results for "${activeSearch}"`
+                : `${totalResults} result${totalResults !== 1 ? 's' : ''} for "${activeSearch}"`}
+            </span>
+          </div>
+
+          {totalResults === 0 ? (
+            <p className="text-center text-muted-foreground py-8">Try a different search term.</p>
+          ) : (
+            <div className="space-y-10">
+              {results.common.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h2 className="text-lg font-bold text-foreground">Common Recipes</h2>
+                    <span className="bg-primary-light text-primary text-xs font-medium px-2 py-0.5 rounded-full">{results.common.length}</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {results.common.map((r) => (
+                      <RecipeCard key={r.id} recipe={r} onToggleFavorite={handleToggleFavorite} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {results.my.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h2 className="text-lg font-bold text-foreground">My Recipes</h2>
+                    <span className="bg-primary-light text-primary text-xs font-medium px-2 py-0.5 rounded-full">{results.my.length}</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {results.my.map((r) => (
+                      <RecipeCard key={r.id} recipe={r} onToggleFavorite={handleToggleFavorite} isOwner showVisibility />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {results.community.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h2 className="text-lg font-bold text-foreground">Community Recipes</h2>
+                    <span className="bg-primary-light text-primary text-xs font-medium px-2 py-0.5 rounded-full">{results.community.length}</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {results.community.map((r) => (
+                      <RecipeCard key={r.id} recipe={r} onToggleFavorite={handleToggleFavorite} showOwner />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getRecipe, updateRecipe, getCategories } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 const inputClasses = "w-full px-4 py-2.5 border border-border rounded-lg bg-card text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring/20 focus:border-primary outline-none transition-colors";
 
 export default function EditRecipePage() {
   const router = useRouter();
   const params = useParams();
+  const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,6 +25,7 @@ export default function EditRecipePage() {
     servings: '',
     prepTime: '',
     imageUrl: '',
+    isPublic: false,
     ingredients: [{ name: '', amount: '', unit: '' }],
     steps: [{ stepNumber: 1, instruction: '' }],
   });
@@ -37,6 +40,11 @@ export default function EditRecipePage() {
           getCategories(),
         ]);
 
+        if (recipeData.userId !== user?.id) {
+          router.replace(`/recipes/${params.id}`);
+          return;
+        }
+
         setCategories(categoriesData);
         setFormData({
           title: recipeData.title || '',
@@ -45,6 +53,7 @@ export default function EditRecipePage() {
           servings: recipeData.servings || '',
           prepTime: recipeData.prepTime || '',
           imageUrl: recipeData.imageUrl || '',
+          isPublic: !!recipeData.isPublic,
           ingredients: recipeData.ingredients?.length > 0
             ? recipeData.ingredients.map(i => ({
                 name: i.name || '',
@@ -160,6 +169,7 @@ export default function EditRecipePage() {
         servings: formData.servings ? parseInt(formData.servings) : null,
         prepTime: formData.prepTime ? parseInt(formData.prepTime) : null,
         imageUrl: formData.imageUrl.trim() || null,
+        isPublic: formData.isPublic,
         ingredients: validIngredients.map(i => ({
           name: i.name.trim(),
           amount: i.amount.trim() || null,
@@ -285,6 +295,31 @@ export default function EditRecipePage() {
                   />
                 </div>
               )}
+            </div>
+
+            {/* Visibility Toggle */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, isPublic: !formData.isPublic })}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  formData.isPublic ? 'bg-primary' : 'bg-border'
+                }`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                  formData.isPublic ? 'translate-x-5' : ''
+                }`} />
+              </button>
+              <div>
+                <span className="text-sm font-medium text-foreground">
+                  {formData.isPublic ? 'Public' : 'Private'}
+                </span>
+                <p className="text-xs text-muted-foreground">
+                  {formData.isPublic
+                    ? 'Other users can see this recipe'
+                    : 'Only you can see this recipe'}
+                </p>
+              </div>
             </div>
 
             {/* Category, Servings, Prep Time */}

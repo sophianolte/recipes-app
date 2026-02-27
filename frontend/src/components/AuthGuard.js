@@ -102,7 +102,7 @@ export default function AuthGuard({ children }) {
           </nav>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/recipes/new"
               className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-accent transition-colors"
@@ -113,7 +113,9 @@ export default function AuthGuard({ children }) {
               <span className="hidden sm:inline">New Recipe</span>
             </Link>
 
-            <div className="flex items-center gap-1.5">
+            <div className="w-px h-5 bg-border-light shrink-0" />
+
+            <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-primary-light text-primary rounded-full flex items-center justify-center text-xs font-semibold">
                 {user.displayName.charAt(0)}
               </div>
@@ -122,7 +124,7 @@ export default function AuthGuard({ children }) {
               </span>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors ml-1"
                 title="Log out"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

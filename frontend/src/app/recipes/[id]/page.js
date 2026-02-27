@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getRecipe, deleteRecipe, toggleFavorite } from '@/lib/api';
+import { getRecipe, deleteRecipe, toggleFavorite, toggleVisibility } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 
 export default function RecipeDetailPage() {
@@ -52,6 +52,15 @@ export default function RecipeDetailPage() {
       setRecipe({ ...recipe, isFavorite: result.isFavorite });
     } catch (err) {
       console.error('Failed to toggle favorite:', err);
+    }
+  }
+
+  async function handleToggleVisibility() {
+    try {
+      const result = await toggleVisibility(params.id);
+      setRecipe({ ...recipe, isPublic: result.isPublic });
+    } catch (err) {
+      console.error('Failed to toggle visibility:', err);
     }
   }
 
@@ -136,6 +145,23 @@ export default function RecipeDetailPage() {
             </button>
             {recipe.userId === user?.id && (
               <>
+                <button
+                  onClick={handleToggleVisibility}
+                  className={`flex items-center gap-1.5 px-3 h-9 rounded-lg border text-sm font-medium transition-colors ${
+                    recipe.isPublic
+                      ? 'bg-primary-light border-primary/30 text-primary'
+                      : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                  title={recipe.isPublic ? 'Set to Private' : 'Set to Public'}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    {recipe.isPublic
+                      ? <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>
+                      : <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></>
+                    }
+                  </svg>
+                  <span>{recipe.isPublic ? 'Public' : 'Private'}</span>
+                </button>
                 <Link
                   href={`/recipes/${recipe.id}/edit`}
                   className="w-9 h-9 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted flex items-center justify-center transition-colors"
